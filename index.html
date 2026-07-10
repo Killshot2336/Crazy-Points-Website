@@ -1,1 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panic Point Games: Game Development Studio</title>
+  <meta name="description" content="Panic Point Games — Game Development Studio. CRYODEATH VR, our first VR title to reach your headsets." />
+  <link rel="icon" href="https://panicpointgames.com/wp-content/uploads/go-x/u/2a7b0e59-6191-43dd-acce-aaf23a78eb3b/w32,h32,rtfit,bg,el1,ex1,fpng/image.png?v=1773124003032" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            terminal: {
+              black: '#000000',
+              border: '#27272a',
+              cyan: '#00f2fe',
+            },
+          },
+          fontFamily: {
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+            display: ['"Orbitron"', 'system-ui', 'sans-serif'],
+            body: ['"Inter"', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            glow: '0 0 20px rgba(0, 242, 254, 0.25)',
+            'glow-sm': '0 0 10px rgba(0, 242, 254, 0.15)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: #000000;
+      color: #e4e4e7;
+    }
+    ::selection {
+      background: rgba(0, 242, 254, 0.25);
+      color: #ffffff;
+    }
+    .terminal-grid {
+      background-image:
+        linear-gradient(rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .scanline::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 242, 254, 0.015) 2px,
+        rgba(0, 242, 254, 0.015) 4px
+      );
+      pointer-events: none;
+    }
+    .glow-text {
+      text-shadow: 0 0 24px rgba(0, 242, 254, 0.35);
+    }
+    .video-placeholder::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0, 242, 254, 0.08), transparent 70%);
+      pointer-events: none;
+    }
+    .status-complete {
+      border-color: rgba(0, 242, 254, 0.4);
+      background: rgba(0, 242, 254, 0.08);
+      color: #00f2fe;
+    }
+    .status-dev {
+      border-color: rgba(250, 204, 21, 0.4);
+      background: rgba(250, 204, 21, 0.08);
+      color: #facc15;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: #27272a;
+      border-radius: 9999px;
+      transition: background 0.2s;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      background: #71717a;
+      border-radius: 9999px;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle-switch.active {
+      background: rgba(0, 242, 254, 0.25);
+    }
+    .toggle-switch.active::after {
+      transform: translateX(20px);
+      background: #00f2fe;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #00f2fe;
+      box-shadow: 0 0 0 1px rgba(0, 242, 254, 0.35);
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 0;
+      height: 1px;
+      background: #00f2fe;
+      transition: width 0.25s ease;
+    }
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: 100%;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    .pulse-glow {
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="font-body antialiased">
 
+  <!-- Fixed Navigation Header -->
+  <header id="site-header" class="fixed top-0 left-0 right-0 z-50 border-b border-terminal-border bg-black/90 backdrop-blur-md">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+      <a href="/" class="group flex items-center gap-3" aria-label="Panic Point Games Home">
+        <img
+          src="https://panicpointgames.com/wp-content/uploads/go-x/u/e7a6e5d7-bda1-46a4-84a9-0b5eeabb8e09/image-455x256.png"
+          alt="Panic Point Games"
+          class="h-10 w-auto transition-opacity group-hover:opacity-80 sm:h-12"
+        />
+      </a>
+
+      <nav class="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
+        <a href="/" class="nav-link active relative px-4 py-2 font-mono text-sm uppercase tracking-wider text-zinc-300 transition-colors hover:text-terminal-cyan">Home</a>
+        <a href="/cryodeath-vr/" class="nav-link relative px-4 py-2 font-mono text-sm uppercase tracking-wider text-zinc-300 transition-colors hover:text-terminal-cyan">CryoDeath VR</a>
+        <a href="/press-kit/" class="nav-link relative px-4 py-2 font-mono text-sm uppercase tracking-wider text-zinc-300 transition-colors hover:text-terminal-cyan">Press Kit</a>
+        <a href="/contact-us/" class="nav-link relative px-4 py-2 font-mono text-sm uppercase tracking-wider text-zinc-300 transition-colors hover:text-terminal-cyan">Contact Us</a>
+        <a href="/cryodeath-vr-quest/" class="nav-link relative ml-2 rounded border border-terminal-cyan/40 bg-terminal-cyan/5 px-4 py-2 font-mono text-sm uppercase tracking-wider text-terminal-cyan transition-all hover:border-terminal-cyan hover:bg-terminal-cyan/10 hover:shadow-glow-sm">CryoDeath VR Quest</a>
+      </nav>
+
+      <button
+        id="mobile-menu-btn"
+        type="button"
+        class="flex items-center justify-center rounded border border-terminal-border p-2 text-zinc-300 transition-colors hover:border-terminal-cyan/50 hover:text-terminal-cyan lg:hidden"
+        aria-label="Toggle navigation menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <i data-lucide="menu" class="h-5 w-5" id="menu-icon"></i>
+        <i data-lucide="x" class="hidden h-5 w-5" id="close-icon"></i>
+      </button>
+    </div>
+
+    <nav id="mobile-menu" class="hidden border-t border-terminal-border bg-black lg:hidden" aria-label="Mobile navigation">
+      <div class="flex flex-col px-4 py-4">
+        <a href="/" class="border-b border-terminal-border px-2 py-3 font-mono text-sm uppercase tracking-wider text-terminal-cyan">Home</a>
+        <a href="/cryodeath-vr/" class="border-b border-terminal-border px-2 py-3 font-mono text-sm uppercase tracking-wider text-zinc-300 hover:text-terminal-cyan">CryoDeath VR</a>
+        <a href="/press-kit/" class="border-b border-terminal-border px-2 py-3 font-mono text-sm uppercase tracking-wider text-zinc-300 hover:text-terminal-cyan">Press Kit</a>
+        <a href="/contact-us/" class="border-b border-terminal-border px-2 py-3 font-mono text-sm uppercase tracking-wider text-zinc-300 hover:text-terminal-cyan">Contact Us</a>
+        <a href="/cryodeath-vr-quest/" class="mt-2 rounded border border-terminal-cyan/40 bg-terminal-cyan/5 px-2 py-3 text-center font-mono text-sm uppercase tracking-wider text-terminal-cyan">CryoDeath VR Quest</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="pt-[72px]">
+
+    <!-- Hero Section & Video Viewer -->
+    <section id="hero" class="relative overflow-hidden border-b border-terminal-border">
+      <div class="terminal-grid absolute inset-0 opacity-40"></div>
+      <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div class="mb-4 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.3em] text-terminal-cyan/70">
+          <span class="inline-block h-px w-8 bg-terminal-cyan/50"></span>
+          <span>System Online</span>
+          <span class="pulse-glow inline-block h-1.5 w-1.5 rounded-full bg-terminal-cyan"></span>
+        </div>
+
+        <h1 class="font-display text-3xl font-bold uppercase tracking-wide text-white sm:text-4xl lg:text-5xl glow-text">
+          CRYODEATH VR Quest Launch Teaser
+        </h1>
+
+        <!-- Video Viewer 1: Quest Launch Teaser -->
+        <div class="mt-10" id="video-quest-teaser" data-video-id="Hd4nn0O4-2k">
+          <div class="video-placeholder relative overflow-hidden rounded-lg border border-terminal-border bg-zinc-950 shadow-glow">
+            <div class="aspect-video w-full">
+              <div id="video-quest-teaser-consent" class="flex h-full flex-col items-center justify-center p-6 text-center sm:p-10">
+                <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-terminal-cyan/30 bg-terminal-cyan/5">
+                  <i data-lucide="info" class="h-6 w-6 text-terminal-cyan"></i>
+                </div>
+                <p class="font-display text-lg font-semibold text-white sm:text-xl">We need your consent to load this video</p>
+                <p class="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400 sm:text-base">
+                  We use a third party service to embed video content that may collect data about your activity. Please review the details in the privacy policy and accept the service to view the video.
+                </p>
+                <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                  <a href="/contact-us/privacy-policy/" class="inline-flex items-center gap-2 rounded border border-terminal-border px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-zinc-300 transition-colors hover:border-terminal-cyan/50 hover:text-terminal-cyan">
+                    <i data-lucide="shield" class="h-4 w-4"></i>
+                    Privacy Policy
+                  </a>
+                  <button
+                    type="button"
+                    class="video-accept-btn inline-flex items-center gap-2 rounded border border-terminal-cyan bg-terminal-cyan/10 px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-terminal-cyan transition-all hover:bg-terminal-cyan/20 hover:shadow-glow-sm"
+                    data-video-target="video-quest-teaser"
+                  >
+                    <i data-lucide="play" class="h-4 w-4"></i>
+                    Accept
+                  </button>
+                </div>
+              </div>
+              <div id="video-quest-teaser-player" class="hidden h-full w-full"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Core Metrics Counter Grid -->
+        <div class="mt-16 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-terminal-border bg-terminal-border sm:grid-cols-3">
+          <div class="group bg-black p-8 text-center transition-colors hover:bg-zinc-950">
+            <div class="font-display text-5xl font-bold text-terminal-cyan glow-text sm:text-6xl">1</div>
+            <div class="mt-3 font-mono text-sm uppercase tracking-[0.2em] text-zinc-400 transition-colors group-hover:text-zinc-300">Game Released</div>
+          </div>
+          <div class="group bg-black p-8 text-center transition-colors hover:bg-zinc-950">
+            <div class="font-display text-5xl font-bold text-terminal-cyan glow-text sm:text-6xl">3</div>
+            <div class="mt-3 font-mono text-sm uppercase tracking-[0.2em] text-zinc-400 transition-colors group-hover:text-zinc-300">Active Projects</div>
+          </div>
+          <div class="group bg-black p-8 text-center transition-colors hover:bg-zinc-950">
+            <div class="font-display text-5xl font-bold text-terminal-cyan glow-text sm:text-6xl">10</div>
+            <div class="mt-3 font-mono text-sm uppercase tracking-[0.2em] text-zinc-400 transition-colors group-hover:text-zinc-300">Team Members</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CryoDeath Quest Progress Section -->
+    <section id="quest-progress" class="relative border-b border-terminal-border">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div class="max-w-3xl">
+          <h2 class="font-display text-2xl font-bold uppercase tracking-wide text-white sm:text-3xl lg:text-4xl">
+            Cryodeath Coming To Meta Quest Soon!
+          </h2>
+
+          <div class="mt-8 space-y-6 text-base leading-relaxed text-zinc-400">
+            <p>
+              CryoDeath is under constant development, with major updates rolling out regularly and a huge wave of free new content released in December 2025.
+            </p>
+            <p>
+              The game has undergone a complete transformation — a full-scale rework that has reshaped systems, visuals, and overall gameplay. And this is only the beginning.
+            </p>
+            <p>
+              Looking ahead to Q1 2026, major work is already underway, including:
+            </p>
+          </div>
+
+          <!-- Roadmap Status Badges -->
+          <ul class="mt-8 space-y-3" aria-label="Development roadmap">
+            <li class="flex flex-col gap-3 rounded-lg border border-terminal-border bg-zinc-950 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <span class="font-mono text-sm text-zinc-300 sm:text-base">Unreal Engine 5.7 upgrade</span>
+              <span class="status-complete inline-flex w-fit items-center gap-2 rounded border px-3 py-1 font-mono text-xs uppercase tracking-wider">
+                <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
+                COMPLETE
+              </span>
+            </li>
+            <li class="flex flex-col gap-3 rounded-lg border border-terminal-border bg-zinc-950 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <span class="font-mono text-sm text-zinc-300 sm:text-base">Tutorial Overhaul 2.0</span>
+              <span class="status-complete inline-flex w-fit items-center gap-2 rounded border px-3 py-1 font-mono text-xs uppercase tracking-wider">
+                <i data-lucide="check-circle" class="h-3.5 w-3.5"></i>
+                COMPLETE
+              </span>
+            </li>
+            <li class="flex flex-col gap-3 rounded-lg border border-terminal-border bg-zinc-950 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <span class="font-mono text-sm text-zinc-300 sm:text-base">Quest Standalone Edition</span>
+              <span class="status-dev inline-flex w-fit items-center gap-2 rounded border px-3 py-1 font-mono text-xs uppercase tracking-wider">
+                <i data-lucide="loader" class="h-3.5 w-3.5"></i>
+                IN DEVELOPMENT
+              </span>
+            </li>
+          </ul>
+
+          <p class="mt-8 text-base leading-relaxed text-zinc-400">
+            Development on CryoDeath remains active, ambitious, and player-driven — with no plans to slow down.
+          </p>
+
+          <a
+            href="https://discord.gg/S99bRdH4Kp"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-8 inline-flex items-center gap-3 rounded border border-terminal-cyan bg-terminal-cyan/10 px-6 py-3 font-mono text-sm uppercase tracking-wider text-terminal-cyan transition-all hover:bg-terminal-cyan/20 hover:shadow-glow"
+          >
+            <i data-lucide="message-circle" class="h-5 w-5"></i>
+            CLICK HERE FOR DISCORD
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRYODEATH VR Feature Section -->
+    <section id="cryodeath-vr" class="relative border-b border-terminal-border scanline">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <h2 class="font-display text-2xl font-bold uppercase leading-tight tracking-wide text-white sm:text-3xl lg:text-4xl">
+              <span class="glow-text text-terminal-cyan">CRYODEATH VR</span> Our First VR Title To Reach Your Headsets
+            </h2>
+
+            <a
+              href="https://store.steampowered.com/app/2205010/CRYODEATH_VR"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-6 inline-flex items-center gap-2 font-mono text-sm uppercase tracking-wider text-terminal-cyan transition-colors hover:text-white"
+            >
+              <i data-lucide="external-link" class="h-4 w-4"></i>
+              Click To Check It Out!
+            </a>
+
+            <p class="mt-6 font-display text-lg font-medium text-zinc-300">
+              A hardcore sci-fi survival horror experience.
+            </p>
+
+            <div class="mt-6 space-y-5 text-base leading-relaxed text-zinc-400">
+              <p>
+                Awaken aboard a derelict spacecraft where life support has failed, systems are collapsing, and something is hunting you. Resources are scarce, the environment is lethal, and every decision matters.
+              </p>
+              <p>
+                Explore a frozen, interconnected ship, restore critical systems, and survive long enough to uncover what went wrong — without becoming part of it.
+              </p>
+              <p>
+                No hand-holding. No second chances.<br />
+                Just tension, immersion, and survival under pressure.
+              </p>
+              <p class="font-display text-terminal-cyan glow-text">
+                Welcome aboard.
+              </p>
+            </div>
+          </div>
+
+          <!-- Video Viewer 2 -->
+          <div id="video-cryodeath" data-video-id="oOIPOIixWKc">
+            <div class="video-placeholder relative overflow-hidden rounded-lg border border-terminal-border bg-zinc-950 shadow-glow">
+              <div class="aspect-video w-full">
+                <div id="video-cryodeath-consent" class="flex h-full flex-col items-center justify-center p-6 text-center sm:p-10">
+                  <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-terminal-cyan/30 bg-terminal-cyan/5">
+                    <i data-lucide="info" class="h-6 w-6 text-terminal-cyan"></i>
+                  </div>
+                  <p class="font-display text-lg font-semibold text-white sm:text-xl">We need your consent to load this video</p>
+                  <p class="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400 sm:text-base">
+                    We use a third party service to embed video content that may collect data about your activity. Please review the details in the privacy policy and accept the service to view the video.
+                  </p>
+                  <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+                    <a href="/contact-us/privacy-policy/" class="inline-flex items-center gap-2 rounded border border-terminal-border px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-zinc-300 transition-colors hover:border-terminal-cyan/50 hover:text-terminal-cyan">
+                      <i data-lucide="shield" class="h-4 w-4"></i>
+                      Privacy Policy
+                    </a>
+                    <button
+                      type="button"
+                      class="video-accept-btn inline-flex items-center gap-2 rounded border border-terminal-cyan bg-terminal-cyan/10 px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-terminal-cyan transition-all hover:bg-terminal-cyan/20 hover:shadow-glow-sm"
+                      data-video-target="video-cryodeath"
+                    >
+                      <i data-lucide="play" class="h-4 w-4"></i>
+                      Accept
+                    </button>
+                  </div>
+                </div>
+                <div id="video-cryodeath-player" class="hidden h-full w-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dive into the World Section -->
+    <section id="world" class="relative border-b border-terminal-border">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div class="text-center">
+          <h2 class="font-display text-2xl font-bold uppercase tracking-wide text-white sm:text-3xl lg:text-4xl">
+            Dive into the World Of Panic Point Games
+          </h2>
+          <p class="mt-4 text-lg text-zinc-400">
+            A New Era of Horror in Virtual Reality
+          </p>
+          <a
+            href="https://www.twitch.tv/directory/category/cryodeath-vr/clips"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-8 inline-flex items-center gap-3 rounded border border-terminal-cyan bg-terminal-cyan/10 px-6 py-3 font-mono text-sm uppercase tracking-wider text-terminal-cyan transition-all hover:bg-terminal-cyan/20 hover:shadow-glow"
+          >
+            <i data-lucide="tv" class="h-5 w-5"></i>
+            Click Me To Watch Some Of Our Favourite Cryodeath Clips !
+          </a>
+        </div>
+        <div class="mt-12 overflow-hidden rounded-lg border border-terminal-border">
+          <img
+            src="https://panicpointgames.com/wp-content/uploads/go-x/u/301da6f6-c435-41fc-98ab-4042029a91bf/l473,t0,w1122,h1080/image-768x739.png"
+            alt="CryoDeath VR gameplay"
+            class="w-full object-cover opacity-90 transition-opacity hover:opacity-100"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact & Application Engine -->
+    <section id="contact" class="relative border-b border-terminal-border">
+      <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+          <!-- Contact Details -->
+          <div>
+            <h2 class="font-display text-2xl font-bold uppercase tracking-wide text-white sm:text-3xl">
+              Contact Details
+            </h2>
+
+            <div class="mt-8 space-y-4">
+              <div class="flex items-center gap-4 rounded-lg border border-terminal-border bg-zinc-950 p-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded border border-terminal-cyan/30 bg-terminal-cyan/5">
+                  <i data-lucide="phone" class="h-5 w-5 text-terminal-cyan"></i>
+                </div>
+                <p class="text-lg text-zinc-200">
+                  <a href="tel:07879862714" class="transition-colors hover:text-terminal-cyan">Telephone: 07879862714</a>
+                </p>
+              </div>
+
+              <div class="flex items-center gap-4 rounded-lg border border-terminal-border bg-zinc-950 p-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded border border-terminal-cyan/30 bg-terminal-cyan/5">
+                  <i data-lucide="mail" class="h-5 w-5 text-terminal-cyan"></i>
+                </div>
+                <p class="text-lg text-zinc-200">
+                  E-mail: <a href="mailto:Info@panicpointgames.com" class="transition-colors hover:text-terminal-cyan">Info@panicpointgames.com</a>
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-6 flex gap-3">
+              <a href="mailto:Info@panicpointgames.com" class="inline-flex items-center gap-2 rounded border border-terminal-border px-4 py-2 font-mono text-xs uppercase tracking-wider text-zinc-400 transition-colors hover:border-terminal-cyan/50 hover:text-terminal-cyan">
+                <i data-lucide="mail" class="h-4 w-4"></i>
+                Email
+              </a>
+              <a href="tel:07879862714" class="inline-flex items-center gap-2 rounded border border-terminal-border px-4 py-2 font-mono text-xs uppercase tracking-wider text-zinc-400 transition-colors hover:border-terminal-cyan/50 hover:text-terminal-cyan">
+                <i data-lucide="phone" class="h-4 w-4"></i>
+                Tel
+              </a>
+            </div>
+
+            <p class="mt-8 font-display text-lg font-semibold text-white">
+              For Support, Business or Job Applications
+            </p>
+            <p class="mt-2 text-terminal-cyan glow-text">
+              Contact us here!
+            </p>
+          </div>
+
+          <!-- Contact Form -->
+          <div class="rounded-lg border border-terminal-border bg-zinc-950 p-6 sm:p-8">
+            <form id="contact-form" novalidate>
+              <div class="space-y-5">
+                <!-- Name -->
+                <div>
+                  <label for="form-name" class="mb-1.5 block font-mono text-xs uppercase tracking-wider text-zinc-400">
+                    Name<span class="text-terminal-cyan">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="form-name"
+                    name="name"
+                    maxlength="200"
+                    autocomplete="off"
+                    class="form-input w-full rounded border border-terminal-border bg-black px-4 py-3 text-sm text-zinc-200 transition-colors"
+                    required
+                  />
+                  <p class="form-error mt-1 hidden text-sm text-red-400" data-error-for="form-name" role="alert" aria-live="assertive">This field is required.</p>
+                </div>
+
+                <!-- E-mail -->
+                <div>
+                  <label for="form-email" class="mb-1.5 block font-mono text-xs uppercase tracking-wider text-zinc-400">
+                    E-mail<span class="text-terminal-cyan">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="form-email"
+                    name="email"
+                    maxlength="200"
+                    autocomplete="nope"
+                    class="form-input w-full rounded border border-terminal-border bg-black px-4 py-3 text-sm text-zinc-200 transition-colors"
+                    required
+                  />
+                  <p class="form-error mt-1 hidden text-sm text-red-400" data-error-for="form-email" data-error-type="required" role="alert" aria-live="assertive">This field is required.</p>
+                  <p class="form-error mt-1 hidden text-sm text-red-400" data-error-for="form-email" data-error-type="invalid" role="alert" aria-live="assertive">Please enter a valid e-mail address.</p>
+                </div>
+
+                <!-- Steam ID -->
+                <div>
+                  <label for="form-steam" class="mb-1.5 block font-mono text-xs uppercase tracking-wider text-zinc-400">
+                    Steam ID / Meta Account Name
+                  </label>
+                  <input
+                    type="text"
+                    id="form-steam"
+                    name="steam"
+                    maxlength="200"
+                    autocomplete="off"
+                    class="form-input w-full rounded border border-terminal-border bg-black px-4 py-3 text-sm text-zinc-200 transition-colors"
+                  />
+                </div>
+
+                <!-- Discord -->
+                <div>
+                  <label for="form-discord" class="mb-1.5 block font-mono text-xs uppercase tracking-wider text-zinc-400">
+                    Discord Account Name
+                  </label>
+                  <input
+                    type="text"
+                    id="form-discord"
+                    name="discord"
+                    maxlength="200"
+                    autocomplete="off"
+                    class="form-input w-full rounded border border-terminal-border bg-black px-4 py-3 text-sm text-zinc-200 transition-colors"
+                  />
+                </div>
+
+                <!-- Message -->
+                <div>
+                  <label for="form-message" class="mb-1.5 block font-mono text-xs uppercase tracking-wider text-zinc-400">
+                    Message<span class="text-terminal-cyan">*</span>
+                  </label>
+                  <textarea
+                    id="form-message"
+                    name="message"
+                    rows="10"
+                    maxlength="2500"
+                    autocomplete="off"
+                    class="form-input w-full resize-y rounded border border-terminal-border bg-black px-4 py-3 text-sm text-zinc-200 transition-colors"
+                    required
+                  ></textarea>
+                  <p class="form-error mt-1 hidden text-sm text-red-400" data-error-for="form-message" role="alert" aria-live="assertive">This field is required.</p>
+                </div>
+
+                <!-- Routing Options -->
+                <fieldset>
+                  <legend class="sr-only">Enquiry type</legend>
+                  <div class="space-y-3">
+                    <label class="flex cursor-pointer items-center gap-3">
+                      <input type="checkbox" name="enquiry" value="business" class="h-4 w-4 rounded border-terminal-border bg-black text-terminal-cyan focus:ring-terminal-cyan/30" />
+                      <span class="text-sm text-zinc-300">Business Enquiry</span>
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-3">
+                      <input type="checkbox" name="enquiry" value="work" class="h-4 w-4 rounded border-terminal-border bg-black text-terminal-cyan focus:ring-terminal-cyan/30" />
+                      <span class="text-sm text-zinc-300">Looking For Work</span>
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-3">
+                      <input type="checkbox" name="enquiry" value="support" class="h-4 w-4 rounded border-terminal-border bg-black text-terminal-cyan focus:ring-terminal-cyan/30" />
+                      <span class="text-sm text-zinc-300">Support</span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <!-- Data Consent -->
+                <div>
+                  <label class="flex cursor-pointer items-start gap-3">
+                    <input type="checkbox" id="form-consent" name="consent" class="mt-1 h-4 w-4 rounded border-terminal-border bg-black text-terminal-cyan focus:ring-terminal-cyan/30" required />
+                    <span class="text-sm leading-relaxed text-zinc-400">
+                      I hereby agree that this data will be stored and processed for the purpose of establishing contact. I am aware that I can revoke my consent at any time.<span class="text-terminal-cyan">*</span>
+                    </span>
+                  </label>
+                  <p class="form-error mt-1 hidden text-sm text-red-400" data-error-for="form-consent" role="alert" aria-live="assertive">This field is required.</p>
+                </div>
+
+                <p id="form-global-error" class="hidden text-sm text-red-400" role="alert" aria-live="assertive">* Please fill in all the required fields.</p>
+
+                <button
+                  type="submit"
+                  id="form-submit"
+                  class="inline-flex w-full items-center justify-center gap-2 rounded border border-terminal-cyan bg-terminal-cyan/10 px-6 py-3 font-mono text-sm uppercase tracking-wider text-terminal-cyan transition-all hover:bg-terminal-cyan/20 hover:shadow-glow sm:w-auto"
+                >
+                  <i data-lucide="send" class="h-4 w-4"></i>
+                  Send
+                </button>
+
+                <p id="form-error-msg" class="hidden text-sm text-red-400" role="alert" aria-live="assertive">
+                  Message could not be sent. Please try again later.
+                </p>
+
+                <div id="form-success-msg" class="hidden flex items-center gap-3 rounded border border-terminal-cyan/30 bg-terminal-cyan/5 p-4 text-terminal-cyan" role="status" aria-live="polite">
+                  <i data-lucide="check-circle" class="h-5 w-5 flex-shrink-0"></i>
+                  <span>Your Message Has Been Sent To The Team!</span>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-terminal-border bg-black">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
+        <p class="font-mono text-xs text-zinc-500">
+          © 2020–2026 Panic Point Games. All rights reserved.
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-6">
+          <a href="/contact-us/privacy-policy/" class="font-mono text-xs uppercase tracking-wider text-zinc-400 transition-colors hover:text-terminal-cyan">Privacy Policy</a>
+          <a href="/contact-us/legal-notice/" class="font-mono text-xs uppercase tracking-wider text-zinc-400 transition-colors hover:text-terminal-cyan">Legal Notice</a>
+          <button
+            type="button"
+            id="open-cookie-settings"
+            class="font-mono text-xs uppercase tracking-wider text-zinc-400 transition-colors hover:text-terminal-cyan"
+          >
+            Privacy Settings
+          </button>
+        </div>
+      </div>
+
+      <!-- Website Translator Consent Block -->
+      <div id="translator-block" class="mt-8 rounded-lg border border-terminal-border bg-zinc-950 p-6">
+        <div id="translator-consent" class="text-center">
+          <div class="mb-4 flex justify-center">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full border border-terminal-cyan/30 bg-terminal-cyan/5">
+              <i data-lucide="languages" class="h-5 w-5 text-terminal-cyan"></i>
+            </div>
+          </div>
+          <p class="font-display text-lg font-semibold text-white">We need your consent to load the translations</p>
+          <p class="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-zinc-400">
+            We use a third-party service to translate the website content that may collect data about your activity. Please review the details in the privacy policy and accept the service to view the translations.
+          </p>
+          <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              id="translator-decline"
+              class="inline-flex items-center gap-2 rounded border border-terminal-border px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-zinc-300 transition-colors hover:border-red-500/50 hover:text-red-400"
+            >
+              Decline
+            </button>
+            <button
+              type="button"
+              id="translator-accept"
+              class="inline-flex items-center gap-2 rounded border border-terminal-cyan bg-terminal-cyan/10 px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-terminal-cyan transition-all hover:bg-terminal-cyan/20"
+            >
+              Accept
+            </button>
+          </div>
+        </div>
+        <div id="translator-active" class="hidden text-center">
+          <p class="font-mono text-sm text-terminal-cyan">
+            <i data-lucide="check" class="inline h-4 w-4"></i>
+            Website Translator service enabled.
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Cookie Consent Banner -->
+  <div id="cookie-banner" class="fixed bottom-0 left-0 right-0 z-50 hidden border-t border-terminal-border bg-black/95 p-4 backdrop-blur-md sm:p-6">
+    <div class="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <p class="max-w-3xl text-sm leading-relaxed text-zinc-400">
+        This site uses third-party website tracking technologies to provide and continually improve our services, I agree and may revoke or change my consent at any time with effect for the future.
+      </p>
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <a href="/contact-us/privacy-policy/" class="inline-flex items-center gap-1 rounded border border-terminal-border px-4 py-2 font-mono text-xs uppercase tracking-wider text-zinc-300 transition-colors hover:border-terminal-cyan/50 hover:text-terminal-cyan">
+          Privacy Policy
+        </a>
+        <button
+          type="button"
+          id="cookie-more"
+          class="inline-flex items-center gap-1 rounded border border-terminal-border px-4 py-2 font-mono text-xs uppercase tracking-wider text-zinc-300 transition-colors hover:border-terminal-cyan/50 hover:text-terminal-cyan"
+        >
+          More
+        </button>
+        <button
+          type="button"
+          id="cookie-accept-all"
+          class="inline-flex items-center gap-1 rounded border border-terminal-cyan bg-terminal-cyan/10 px-4 py-2 font-mono text-xs uppercase tracking-wider text-terminal-cyan transition-all hover:bg-terminal-cyan/20"
+        >
+          Accept
+        </button>
+        <button
+          type="button"
+          id="cookie-reject"
+          class="inline-flex items-center gap-1 rounded border border-terminal-border px-4 py-2 font-mono text-xs uppercase tracking-wider text-zinc-300 transition-colors hover:border-red-500/50 hover:text-red-400"
+        >
+          Reject
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Settings Overlay -->
+  <div id="cookie-overlay" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="cookie-settings-title">
+    <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-terminal-border bg-zinc-950 shadow-glow">
+      <div class="sticky top-0 flex items-center justify-between border-b border-terminal-border bg-zinc-950 px-6 py-4">
+        <h3 id="cookie-settings-title" class="font-display text-lg font-bold uppercase tracking-wide text-white">Privacy Settings</h3>
+        <button type="button" id="close-cookie-settings" class="rounded border border-terminal-border p-1.5 text-zinc-400 transition-colors hover:border-terminal-cyan/50 hover:text-terminal-cyan" aria-label="Close privacy settings">
+          <i data-lucide="x" class="h-4 w-4"></i>
+        </button>
+      </div>
+
+      <div class="px-6 py-5">
+        <p class="text-sm leading-relaxed text-zinc-400">
+          This tool helps you to select and deactivate various tags / trackers / analytic tools used on this website.
+        </p>
+
+        <!-- Select All -->
+        <div class="mt-6 flex items-center justify-between rounded-lg border border-terminal-border bg-black p-4">
+          <span class="font-mono text-sm uppercase tracking-wider text-zinc-300">Select all services</span>
+          <div class="toggle-switch" id="toggle-all" role="switch" aria-checked="false" tabindex="0"></div>
+        </div>
+
+        <!-- Website Translator -->
+        <div class="mt-4 rounded-lg border border-terminal-border bg-black">
+          <div class="flex items-center justify-between p-4">
+            <div class="flex items-center gap-3">
+              <i data-lucide="languages" class="h-4 w-4 text-terminal-cyan"></i>
+              <span class="font-mono text-sm text-zinc-300">Website Translator</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button type="button" class="service-more font-mono text-xs uppercase tracking-wider text-terminal-cyan hover:underline" data-service="translator">More</button>
+              <div class="toggle-switch service-toggle" data-service="translator" role="switch" aria-checked="false" tabindex="0"></div>
+            </div>
+          </div>
+          <div class="service-detail hidden border-t border-terminal-border px-4 py-3 text-sm text-zinc-500" data-service="translator">
+            <p>Enables third-party website translation services that may collect data about your activity.</p>
+            <button type="button" class="service-less mt-2 font-mono text-xs uppercase tracking-wider text-terminal-cyan hover:underline" data-service="translator">Less</button>
+          </div>
+        </div>
+
+        <!-- IONOS SiteAnalytics -->
+        <div class="mt-3 rounded-lg border border-terminal-border bg-black">
+          <div class="flex items-center justify-between p-4">
+            <div class="flex items-center gap-3">
+              <i data-lucide="bar-chart-2" class="h-4 w-4 text-terminal-cyan"></i>
+              <span class="font-mono text-sm text-zinc-300">IONOS SiteAnalytics</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button type="button" class="service-more font-mono text-xs uppercase tracking-wider text-terminal-cyan hover:underline" data-service="analytics">More</button>
+              <div class="toggle-switch service-toggle" data-service="analytics" role="switch" aria-checked="false" tabindex="0"></div>
+            </div>
+          </div>
+          <div class="service-detail hidden border-t border-terminal-border px-4 py-3 text-sm text-zinc-500" data-service="analytics">
+            <p>Collects anonymised website traffic and usage data to monitor performance and improve user experience.</p>
+            <button type="button" class="service-less mt-2 font-mono text-xs uppercase tracking-wider text-terminal-cyan hover:underline" data-service="analytics">Less</button>
+          </div>
+        </div>
+
+        <!-- YouTube Video -->
+        <div class="mt-3 rounded-lg border border-terminal-border bg-black">
+          <div class="flex items-center justify-between p-4">
+            <div class="flex items-center gap-3">
+              <i data-lucide="youtube" class="h-4 w-4 text-terminal-cyan"></i>
+              <span class="font-mono text-sm text-zinc-300">YouTube Video</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button type="button" class="service-more font-mono text-xs uppercase tracking-wider text-terminal-cyan hover:underline" data-service="video">More</button>
+              <div class="toggle-switch service-toggle" data-service="video" role="switch" aria-checked="false" tabindex="0"></div>
+            </div>
+          </div>
+          <div class="service-detail hidden border-t border-terminal-border px-4 py-3 text-sm text-zinc-500" data-service="video">
+            <p>Embeds YouTube video content that may collect data about your activity when videos are played.</p>
+            <button type="button" class="service-less mt-2 font-mono text-xs uppercase tracking-wider text-terminal-cyan hover:underline" data-service="video">Less</button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          id="save-cookie-settings"
+          class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded border border-terminal-cyan bg-terminal-cyan/10 px-6 py-3 font-mono text-sm uppercase tracking-wider text-terminal-cyan transition-all hover:bg-terminal-cyan/20 hover:shadow-glow-sm"
+        >
+          <i data-lucide="save" class="h-4 w-4"></i>
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      lucide.createIcons();
+
+      /* ── Mobile Navigation ── */
+      var menuBtn = document.getElementById('mobile-menu-btn');
+      var mobileMenu = document.getElementById('mobile-menu');
+      var menuIcon = document.getElementById('menu-icon');
+      var closeIcon = document.getElementById('close-icon');
+
+      menuBtn.addEventListener('click', function () {
+        var isOpen = !mobileMenu.classList.contains('hidden');
+        mobileMenu.classList.toggle('hidden');
+        menuIcon.classList.toggle('hidden');
+        closeIcon.classList.toggle('hidden');
+        menuBtn.setAttribute('aria-expanded', String(!isOpen));
+      });
+
+      /* ── Consent State ── */
+      var CONSENT_KEY = 'ppg_cookie_consent';
+      var consent = { video: false, analytics: false, translator: false };
+
+      function loadConsent() {
+        try {
+          var stored = localStorage.getItem(CONSENT_KEY);
+          if (stored) consent = JSON.parse(stored);
+        } catch (e) { /* noop */ }
+      }
+
+      function saveConsent() {
+        localStorage.setItem(CONSENT_KEY, JSON.stringify(consent));
+      }
+
+      function updateToggleUI() {
+        document.querySelectorAll('.service-toggle').forEach(function (el) {
+          var svc = el.getAttribute('data-service');
+          var active = consent[svc];
+          el.classList.toggle('active', active);
+          el.setAttribute('aria-checked', String(active));
+        });
+        var allOn = consent.video && consent.analytics && consent.translator;
+        var toggleAll = document.getElementById('toggle-all');
+        toggleAll.classList.toggle('active', allOn);
+        toggleAll.setAttribute('aria-checked', String(allOn));
+      }
+
+      function loadVideo(targetId) {
+        var container = document.getElementById(targetId);
+        if (!container) return;
+        var videoId = container.getAttribute('data-video-id');
+        var consentEl = document.getElementById(targetId + '-consent');
+        var playerEl = document.getElementById(targetId + '-player');
+        if (!videoId || !consentEl || !playerEl) return;
+        consentEl.classList.add('hidden');
+        playerEl.classList.remove('hidden');
+        playerEl.innerHTML = '<iframe class="h-full w-full" src="https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+      }
+
+      function applyConsent() {
+        updateToggleUI();
+        if (consent.video) {
+          loadVideo('video-quest-teaser');
+          loadVideo('video-cryodeath');
+        }
+        if (consent.translator) {
+          document.getElementById('translator-consent').classList.add('hidden');
+          document.getElementById('translator-active').classList.remove('hidden');
+        }
+      }
+
+      loadConsent();
+      applyConsent();
+
+      /* ── Cookie Banner ── */
+      var banner = document.getElementById('cookie-banner');
+      if (!localStorage.getItem(CONSENT_KEY + '_banner')) {
+        banner.classList.remove('hidden');
+      }
+
+      document.getElementById('cookie-accept-all').addEventListener('click', function () {
+        consent = { video: true, analytics: true, translator: true };
+        saveConsent();
+        localStorage.setItem(CONSENT_KEY + '_banner', '1');
+        banner.classList.add('hidden');
+        applyConsent();
+      });
+
+      document.getElementById('cookie-reject').addEventListener('click', function () {
+        consent = { video: false, analytics: false, translator: false };
+        saveConsent();
+        localStorage.setItem(CONSENT_KEY + '_banner', '1');
+        banner.classList.add('hidden');
+        updateToggleUI();
+      });
+
+      document.getElementById('cookie-more').addEventListener('click', function () {
+        openCookieSettings();
+      });
+
+      /* ── Privacy Settings Overlay ── */
+      var overlay = document.getElementById('cookie-overlay');
+
+      function openCookieSettings() {
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        updateToggleUI();
+      }
+
+      function closeCookieSettings() {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+      }
+
+      document.getElementById('open-cookie-settings').addEventListener('click', openCookieSettings);
+      document.getElementById('close-cookie-settings').addEventListener('click', closeCookieSettings);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeCookieSettings();
+      });
+
+      document.querySelectorAll('.service-toggle, #toggle-all').forEach(function (el) {
+        el.addEventListener('click', function () {
+          if (el.id === 'toggle-all') {
+            var allOn = !(consent.video && consent.analytics && consent.translator);
+            consent.video = allOn;
+            consent.analytics = allOn;
+            consent.translator = allOn;
+          } else {
+            var svc = el.getAttribute('data-service');
+            consent[svc] = !consent[svc];
+          }
+          updateToggleUI();
+        });
+      });
+
+      document.querySelectorAll('.service-more').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var svc = btn.getAttribute('data-service');
+          var detail = document.querySelector('.service-detail[data-service="' + svc + '"]');
+          detail.classList.remove('hidden');
+          btn.classList.add('hidden');
+        });
+      });
+
+      document.querySelectorAll('.service-less').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var svc = btn.getAttribute('data-service');
+          var detail = document.querySelector('.service-detail[data-service="' + svc + '"]');
+          detail.classList.add('hidden');
+          document.querySelector('.service-more[data-service="' + svc + '"]').classList.remove('hidden');
+        });
+      });
+
+      document.getElementById('save-cookie-settings').addEventListener('click', function () {
+        saveConsent();
+        localStorage.setItem(CONSENT_KEY + '_banner', '1');
+        banner.classList.add('hidden');
+        closeCookieSettings();
+        applyConsent();
+      });
+
+      /* ── Video Accept Buttons ── */
+      document.querySelectorAll('.video-accept-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          consent.video = true;
+          saveConsent();
+          loadVideo(btn.getAttribute('data-video-target'));
+          updateToggleUI();
+        });
+      });
+
+      /* ── Translator Consent ── */
+      document.getElementById('translator-accept').addEventListener('click', function () {
+        consent.translator = true;
+        saveConsent();
+        document.getElementById('translator-consent').classList.add('hidden');
+        document.getElementById('translator-active').classList.remove('hidden');
+        updateToggleUI();
+      });
+
+      document.getElementById('translator-decline').addEventListener('click', function () {
+        consent.translator = false;
+        saveConsent();
+        updateToggleUI();
+      });
+
+      /* ── Contact Form ── */
+      var form = document.getElementById('contact-form');
+
+      function showError(fieldId, show) {
+        var err = document.querySelector('[data-error-for="' + fieldId + '"]:not([data-error-type])');
+        if (!err && fieldId === 'form-email') {
+          err = document.querySelector('[data-error-for="form-email"][data-error-type="required"]');
+        }
+        if (err) err.classList.toggle('hidden', !show);
+      }
+
+      function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var valid = true;
+        var name = document.getElementById('form-name');
+        var email = document.getElementById('form-email');
+        var message = document.getElementById('form-message');
+        var consentBox = document.getElementById('form-consent');
+        var globalError = document.getElementById('form-global-error');
+        var errorMsg = document.getElementById('form-error-msg');
+        var successMsg = document.getElementById('form-success-msg');
+
+        globalError.classList.add('hidden');
+        errorMsg.classList.add('hidden');
+        successMsg.classList.add('hidden');
+        document.querySelectorAll('.form-error').forEach(function (el) { el.classList.add('hidden'); });
+
+        if (!name.value.trim()) { showError('form-name', true); valid = false; }
+        if (!email.value.trim()) {
+          document.querySelector('[data-error-for="form-email"][data-error-type="required"]').classList.remove('hidden');
+          valid = false;
+        } else if (!validateEmail(email.value.trim())) {
+          document.querySelector('[data-error-for="form-email"][data-error-type="invalid"]').classList.remove('hidden');
+          valid = false;
+        }
+        if (!message.value.trim()) { showError('form-message', true); valid = false; }
+        if (!consentBox.checked) { showError('form-consent', true); valid = false; }
+
+        if (!valid) {
+          globalError.classList.remove('hidden');
+          return;
+        }
+
+        var submitBtn = document.getElementById('form-submit');
+        submitBtn.disabled = true;
+
+        setTimeout(function () {
+          submitBtn.disabled = false;
+          successMsg.classList.remove('hidden');
+          successMsg.classList.add('flex');
+          form.reset();
+          lucide.createIcons();
+        }, 800);
+      });
+    });
+  </script>
+</body>
+</html>
