@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void: #000000;
+  --color-onyx: #050505;
+  --color-border: #27272a;
+  --color-cyan: #00f2fe;
+  --color-cyan-dim: #00f2fe40;
+  --color-zinc-muted: #a1a1aa;
+
+  --font-display: "Orbitron", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --shadow-glow: 0 0 20px rgba(0, 242, 254, 0.25);
+  --shadow-glow-sm: 0 0 10px rgba(0, 242, 254, 0.15);
+
+  --animate-border-pulse: border-pulse 2.5s ease-in-out infinite;
+  --animate-radar: radar-pulse 2s ease-out infinite;
+  --animate-caret: caret-blink 1s step-end infinite;
+}
+
+@keyframes border-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 242, 254, 0.15), inset 0 0 8px rgba(0, 242, 254, 0.05); }
+  50% { box-shadow: 0 0 22px rgba(0, 242, 254, 0.35), inset 0 0 14px rgba(0, 242, 254, 0.1); }
+}
+
+@keyframes radar-pulse {
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes caret-blink {
+  0%, 100% { border-color: #00f2fe; }
+  50% { border-color: transparent; }
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: #000000;
+  color: #e4e4e7;
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+.font-body {
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+::selection {
+  background: rgba(0, 242, 254, 0.25);
+  color: #ffffff;
+}
+
+.glow-text {
+  text-shadow: 0 0 24px rgba(0, 242, 254, 0.35);
+}
+
+.terminal-input {
+  caret-color: #00f2fe;
+  border-left: 2px solid transparent;
+}
+
+.terminal-input:focus {
+  outline: none;
+  border-color: #00f2fe;
+  border-left-color: #00f2fe;
+  box-shadow: 0 0 0 1px rgba(0, 242, 254, 0.35), inset 0 0 12px rgba(0, 242, 254, 0.05);
+  animation: caret-blink 1s step-end infinite;
+}
+
+.video-glow-overlay {
+  background: radial-gradient(circle at center, rgba(0, 242, 254, 0.12), transparent 70%);
+  box-shadow: inset 0 0 60px rgba(0, 242, 254, 0.08);
+}
+
+.window-chrome {
+  background: rgba(5, 5, 5, 0.4);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(0, 242, 254, 0.2);
+  animation: border-pulse 2.5s ease-in-out infinite;
+}
+
+.crt-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 242, 254, 0.018) 2px,
+    rgba(0, 242, 254, 0.018) 4px
+  );
+  opacity: 0.35;
+}
+
+.crt-vignette {
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.crt-curvature {
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.45);
+  border-radius: 2%;
+}
+
+.crt-overlay {
+  mix-blend-mode: screen;
+}
+
+.industrial-toggle {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.industrial-toggle::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: #52525b;
+  border-radius: 1px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.industrial-toggle.active {
+  background: rgba(0, 242, 254, 0.12);
+  border-color: rgba(0, 242, 254, 0.5);
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.2);
+}
+
+.industrial-toggle.active::after {
+  transform: translateX(22px);
+  background: #00f2fe;
+}
+
+.radar-node {
+  position: relative;
+}
+
+.radar-node::before,
+.radar-node::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(250, 204, 21, 0.5);
+  animation: radar-pulse 2s ease-out infinite;
+}
+
+.radar-node::after {
+  animation-delay: 1s;
+}
+
+.status-complete {
+  border-color: rgba(0, 242, 254, 0.4);
+  background: rgba(0, 242, 254, 0.08);
+  color: #00f2fe;
+}
+
+.status-dev {
+  border-color: rgba(250, 204, 21, 0.4);
+  background: rgba(250, 204, 21, 0.08);
+  color: #facc15;
+}
+
+.os-grid {
+  background-image:
+    linear-gradient(rgba(0, 242, 254, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 242, 254, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
